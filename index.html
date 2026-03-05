@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業時間計測君</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-clock"></i>
+                <span>作業時間計測君</span>
+            </div>
+            <div id="sidebar-user-name"
+                style="padding: 0 20px 16px; font-size: 0.9rem; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+                👤 <span id="display-user-name">登録者: 未設定</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" data-target="main-view" class="active"><i class="fa-solid fa-home"></i> メイン</a></li>
+                <li><a href="#" data-target="items-view"><i class="fa-solid fa-list-check"></i> アイテム管理</a></li>
+                <li><a href="#" data-target="history-view"><i class="fa-solid fa-clock-rotate-left"></i> 履歴</a></li>
+                <li><a href="#" data-target="summary-view"><i class="fa-solid fa-chart-pie"></i> サマリー</a></li>
+                <li><a href="#" data-target="stack-view"><i class="fa-solid fa-wand-magic-sparkles"></i> 今日の積み上げを作る</a>
+                </li>
+                <li><a href="#" data-target="settings-view"><i class="fa-solid fa-gear"></i> 設定</a></li>
+                <li><a href="#" data-target="help-view"><i class="fa-solid fa-circle-question"></i> 使い方</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Main View (Timer) -->
+            <section id="main-view" class="view-section active">
+                <header>
+                    <h2>メイン</h2>
+                    <div class="today-summary">
+                        <span>今日の合計時間: </span>
+                        <strong id="today-total-time">00:00:00</strong>
+                    </div>
+                </header>
+                <div class="active-task-container" id="active-task-wrapper" style="display: none;">
+                    <div class="active-task-card">
+                        <div class="task-info">
+                            <span class="status-badge"><i class="fa-solid fa-spinner fa-spin"></i> 計測中</span>
+                            <h3 id="running-task-name">タスク名</h3>
+                            <p class="start-time">開始: <span id="running-start-time">00:00</span></p>
+                        </div>
+                        <div class="task-timer">
+                            <div class="time-display" id="running-time-display">00:00:00</div>
+                            <button id="btn-stop-task" class="btn btn-danger btn-lg"><i class="fa-solid fa-stop"></i>
+                                終了</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="items-grid" id="main-items-grid">
+                    <!-- Items will be injected here -->
+                </div>
+            </section>
+
+            <!-- Items Management View -->
+            <section id="items-view" class="view-section">
+                <header>
+                    <h2>作業アイテム管理</h2>
+                </header>
+                <div class="card add-item-card">
+                    <h3>新規登録</h3>
+                    <form id="form-add-item" class="flex-form">
+                        <div class="form-group">
+                            <label for="item-name">アイテム名</label>
+                            <input type="text" id="item-name" required placeholder="例: 読書">
+                        </div>
+                        <div class="form-group">
+                            <label for="item-color">カラー</label>
+                            <input type="color" id="item-color" value="#4F8EF7">
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> 登録</button>
+                    </form>
+                </div>
+                <div class="card items-list-card">
+                    <h3>登録済みアイテム</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>カラー</th>
+                                    <th>名前</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-table-body">
+                                <!-- Items will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History View -->
+            <section id="history-view" class="view-section">
+                <header>
+                    <h2>履歴</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-outline" id="btn-copy-history-text"><i class="fa-solid fa-copy"></i>
+                            テキストでコピー</button>
+                        <button class="btn btn-outline" id="btn-add-manual-record"><i class="fa-solid fa-plus"></i>
+                            手動追加</button>
+                    </div>
+                </header>
+                <div class="filters-card">
+                    <div class="filter-group">
+                        <label for="filter-item">アイテム:</label>
+                        <select id="filter-item">
+                            <option value="">すべて</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-date-from">期間:</label>
+                        <div>
+                            <input type="date" id="filter-date-from"> 〜 <input type="date" id="filter-date-to">
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="btn-apply-filter">絞り込み</button>
+                    <div class="filter-summary"
+                        style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; justify-content: center;">
+                        <span class="text-muted" style="font-size: 0.9rem;">絞り込み合計時間</span>
+                        <strong id="history-filtered-time"
+                            style="font-size: 1.25rem; color: var(--primary);">00:00:00</strong>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>日付</th>
+                                    <th>アイテム</th>
+                                    <th>開始</th>
+                                    <th>終了</th>
+                                    <th>時間</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- History will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summary View -->
+            <section id="summary-view" class="view-section">
+                <header>
+                    <h2>サマリー</h2>
+                </header>
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-period="day">日</button>
+                    <button class="tab-btn" data-period="week">週</button>
+                    <button class="tab-btn" data-period="month">月</button>
+                    <button class="tab-btn" data-period="year">年</button>
+                    <button class="tab-btn" data-period="all">全期間</button>
+                </div>
+                <div class="period-navigator" id="period-nav-container">
+                    <button class="icon-btn" id="btn-prev-period"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="current-period-label">今日</span>
+                    <button class="icon-btn" id="btn-next-period"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <p class="stat-label">総作業時間</p>
+                        <h3 class="stat-value" id="summary-total-time">00:00:00</h3>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="card chart-card">
+                        <h3>ランキング & 割合</h3>
+                        <div class="chart-container pie-container">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card chart-card">
+                        <h3>作業時間別</h3>
+                        <div class="chart-container bar-container">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="settings-view" class="view-section">
+                <header>
+                    <h2>設定</h2>
+                </header>
+                <div class="card">
+                    <h3>登録者の設定</h3>
+                    <p class="text-muted">アプリを利用する登録者名を設定します。</p>
+                    <form id="form-user-name" class="flex-form" style="margin-top: 16px;">
+                        <div class="form-group" style="max-width: 300px;">
+                            <label for="setting-user-name">名前</label>
+                            <input type="text" id="setting-user-name" placeholder="👤 未設定" maxlength="20">
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> 保存</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>スタートガイド</h3>
+                    <p class="text-muted">初回アクセス時に表示される使い方ガイドを再度確認します。</p>
+                    <button class="btn btn-outline" id="btn-show-tutorial"><i class="fa-solid fa-book-open"></i>
+                        スタートガイドを見る</button>
+                </div>
+                <div class="card">
+                    <h3>データのエクスポート・インポート</h3>
+                    <p class="text-muted">ブラウザに保存されているデータをファイルとして保存したり、読み込んだりできます。</p>
+                    <div class="settings-actions">
+                        <button class="btn btn-primary" id="btn-export-json"><i class="fa-solid fa-download"></i>
+                            JSONでエクスポート</button>
+                        <div class="import-wrapper">
+                            <input type="file" id="file-import-json" accept=".json" style="display: none;">
+                            <button class="btn btn-outline" id="btn-import-trigger"><i class="fa-solid fa-upload"></i>
+                                JSONをインポート</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card danger-zone">
+                    <h3 class="text-danger">危険な操作</h3>
+                    <p>すべてのデータを削除し、初期状態に戻します。この操作は取り消せません。</p>
+                    <button class="btn btn-danger" id="btn-clear-data"><i class="fa-solid fa-trash"></i>
+                        データを全消去</button>
+                </div>
+            </section>
+
+            <!-- Stack View -->
+            <section id="stack-view" class="view-section">
+                <header>
+                    <h2>今日の積み上げを作る</h2>
+                    <p class="text-muted" style="margin-top: 8px;">期間内の作業履歴を集計し、SNS投稿用文章と画像生成プロンプトを作成します。</p>
+                </header>
+
+                <div class="card">
+                    <h3>集計設定</h3>
+                    <div class="flex-form" style="margin-top: 16px; align-items: flex-start;">
+                        <div class="form-group" style="max-width: 200px;">
+                            <label for="stack-period-select">期間を選択</label>
+                            <select id="stack-period-select">
+                                <option value="today">今日</option>
+                                <option value="yesterday">昨日</option>
+                                <option value="week">今週</option>
+                                <option value="custom">任意期間</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="stack-custom-date" style="display: none;">
+                            <label>期間指定</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="date" id="stack-date-from"> 〜
+                                <input type="date" id="stack-date-to">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 28px;">
+                            <button id="btn-generate-stack" class="btn btn-primary"><i class="fa-solid fa-bolt"></i>
+                                生成する</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="stack-results" style="display: none;">
+                    <h3>生成結果</h3>
+
+                    <div
+                        style="display: flex; gap: 24px; margin: 16px 0; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                        <div><span class="text-muted">合計時間:</span> <strong id="stack-result-total-time"
+                                style="color: var(--primary); font-size: 1.25rem;">00:00:00</strong></div>
+                        <div><span class="text-muted">最多アイテム:</span> <strong id="stack-result-top-item"
+                                style="font-size: 1.1rem;">-</strong></div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                            <label style="font-weight: 600;">SNS投稿文</label>
+                            <button id="btn-copy-stack-msg" class="btn btn-outline"
+                                style="padding: 4px 8px; font-size: 0.85rem;"><i class="fa-solid fa-copy"></i>
+                                コピー</button>
+                        </div>
+                        <textarea id="stack-output-msg" readonly
+                            style="width: 100%; height: 120px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-family: inherit; resize: vertical; line-height: 1.6;"></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                            <label style="font-weight: 600;">画像生成用プロンプト（日本語）</label>
+                            <button id="btn-copy-stack-prompt-ja" class="btn btn-outline"
+                                style="padding: 4px 8px; font-size: 0.85rem;"><i class="fa-solid fa-copy"></i>
+                                コピー</button>
+                        </div>
+                        <textarea id="stack-output-prompt-ja" readonly
+                            style="width: 100%; height: 80px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-family: inherit; resize: vertical; line-height: 1.6;"></textarea>
+                    </div>
+
+                    <div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;">
+                            <label style="font-weight: 600;">画像生成用プロンプト（英語）</label>
+                            <button id="btn-copy-stack-prompt-en" class="btn btn-outline"
+                                style="padding: 4px 8px; font-size: 0.85rem;"><i class="fa-solid fa-copy"></i>
+                                コピー</button>
+                        </div>
+                        <textarea id="stack-output-prompt-en" readonly
+                            style="width: 100%; height: 80px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius); font-family: inherit; resize: vertical; line-height: 1.6;"></textarea>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Help View -->
+            <section id="help-view" class="view-section">
+                <header>
+                    <h2>使い方</h2>
+                </header>
+                <div class="card">
+                    <h3>作業時間計測君の基本的な使い方</h3>
+                    <div class="tutorial-content" style="line-height: 1.8;">
+                        <p><strong>1. アイテム管理</strong><br>
+                            まずは「アイテム管理」から、計測したい作業項目（「読書」「勉強」など）を登録します。色も自由に選べます。</p>
+                        <p><strong>2. メイン（時間の計測）</strong><br>
+                            「メイン」画面に登録したアイテムが表示されます。「開始」を押すと計測がスタートします。別のアイテムを開始したり、「終了」ボタンを押すことで記録が保存されます。</p>
+                        <p><strong>3. 履歴とコピー機能</strong><br>
+                            「履歴」画面では過去の記録を確認できます。手動追加も可能です。さらに「テキストでコピー」を使うと、絞り込んだ結果の合計時間をクリップボードにコピーできます。</p>
+                        <p><strong>4. サマリー</strong><br>
+                            「サマリー」画面でグラフによる分析ができます。日・週・月ごとの作業の偏りを確認しましょう。</p>
+                        <p><strong>5. 今日の積み上げを作る</strong><br>
+                            期間内の履歴からSNS投稿用の文章を作れます。最も時間をかけた（最多アイテム）に応じた画像生成プロンプト（少しランダム要素入り）も一緒に作られるので、日々の振り返り投稿に活用してください。
+                        </p>
+                        <p><strong>6. 設定（登録者名とデータバックアップ）</strong><br>
+                            「設定」からあなたの名前（登録者名）を設定すると、コピー時等に名前を入れることができます。またJSON形式でのデータバックアップもここで行えます。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="modal-confirm">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 id="confirm-title">確認</h3>
+                <button class="icon-btn close-confirm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message" style="margin: 0; white-space: pre-wrap;">よろしいですか？</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline close-confirm" id="btn-confirm-cancel">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="btn-confirm-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal-overlay" id="modal-alert">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 id="alert-title">通知</h3>
+                <button class="icon-btn close-alert"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="alert-message" style="margin: 0; white-space: pre-wrap;"></p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" id="btn-alert-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Manual Record Modal -->
+    <div class="modal-overlay" id="modal-manual-record">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">手動記録追加</h3>
+                <button class="icon-btn close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-manual-record">
+                    <input type="hidden" id="manual-record-id">
+                    <div class="form-group">
+                        <label for="manual-item">アイテム</label>
+                        <select id="manual-item" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-date">日付</label>
+                        <input type="date" id="manual-date" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="manual-start">開始時刻</label>
+                            <input type="time" id="manual-start" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="manual-end">終了時刻</label>
+                            <input type="time" id="manual-end" required>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline close-modal">キャンセル</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div class="modal-overlay" id="modal-edit-item">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>アイテムの編集</h3>
+                <button class="icon-btn close-edit-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-edit-item">
+                    <input type="hidden" id="edit-item-id">
+                    <div class="form-group">
+                        <label for="edit-item-name">アイテム名</label>
+                        <input type="text" id="edit-item-name" required placeholder="例: 読書">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-item-color">カラー</label>
+                        <input type="color" id="edit-item-color" value="#4F8EF7">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline close-edit-modal">キャンセル</button>
+                        <button type="button" class="btn btn-primary" id="btn-save-edit-item">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div class="modal-overlay" id="modal-tutorial">
+        <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 style="font-size: 1.5rem; color: var(--primary);">ようこそ！ 作業時間計測君へ</h3>
+                <button class="icon-btn close-tutorial"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="line-height: 1.6;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fa-solid fa-clock-rotate-left" style="font-size: 3.5rem; color: var(--primary);"></i>
+                </div>
+                <p style="font-size: 1.05rem; font-weight: 500; text-align: center;">
+                    「作業時間計測君」は、あなたの日々の作業や勉強時間を<br>簡単に記録・集計できるツールです。</p>
+
+                <div style="background-color: var(--bg-hover); padding: 18px; border-radius: 8px; margin: 20px 0;">
+                    <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-list-check" style="color:var(--primary); width:20px;"></i>
+                            <strong>アイテムの追加</strong>：まずは「アイテム管理」で作業メニューを作ります
+                        </li>
+                        <li><i class="fa-solid fa-play" style="color:var(--success); width:20px;"></i>
+                            <strong>開始と終了</strong>：「メイン」から作業を選んで開始。終わったら終了！
+                        </li>
+                        <li><i class="fa-solid fa-chart-pie" style="color:var(--warning); width:20px;"></i>
+                            <strong>履歴・サマリー</strong>：記録した時間はグラフで振り返ることができます
+                        </li>
+                        <li><i class="fa-solid fa-copy" style="color:var(--primary); width:20px;"></i>
+                            <strong>コピー機能</strong>：履歴からサクッとテキスト化してコピーできます
+                        </li>
+                        <li><i class="fa-solid fa-wand-magic-sparkles" style="color:#9b59b6; width:20px;"></i>
+                            <strong>積み上げを作る</strong>：履歴からSNS投稿用の文と画像生成プロンプトを作れます
+                        </li>
+                        <li><i class="fa-solid fa-gear" style="color:var(--text-muted); width:20px;"></i>
+                            <strong>設定</strong>：登録者名を設定したり、JSONバックアップが可能です
+                        </li>
+                    </ul>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); text-align: center;">※
+                    データはすべてお使いのブラウザ内（ローカル）に保存されるため、<br>安全かつ高速に動作します。</p>
+            </div>
+            <div class="modal-actions"
+                style="justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px;">
+                <label style="font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="chk-tutorial-dont-show" style="width: 16px; height: 16px;">
+                    <strong>今後表示しない</strong>
+                </label>
+                <button type="button" class="btn btn-primary btn-lg" id="btn-tutorial-ok"
+                    style="min-width: 120px;">はじめる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/storage.js?v=7"></script>
+    <script src="js/timer.js?v=7"></script>
+    <script src="js/charts.js?v=7"></script>
+    <script src="js/app.js?v=7"></script>
+</body>
+
+</html>

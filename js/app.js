@@ -25,6 +25,7 @@ const App = {
         this.updateTodayTotalTime();
         this.renderHistory();
         this.updateUserNameDisplay();
+        this.updateLastBackupDisplay();
 
         // Initial summary
         ChartsAPI.init();
@@ -417,18 +418,28 @@ const App = {
             btn.addEventListener('click', () => modal.classList.remove('active'));
         });
 
-        document.getElementById('form-manual-record').addEventListener('submit', (e) => {
+        const formManualRecord = document.getElementById('form-manual-record');
+        formManualRecord.addEventListener('submit', (e) => {
             e.preventDefault();
+        });
+
+        document.getElementById('btn-save-manual-record').addEventListener('click', () => {
+            const endInput = document.getElementById('manual-end');
+            endInput.setCustomValidity(''); // Reset previous errors
+
+            if (!formManualRecord.reportValidity()) return;
+
             const itemId = document.getElementById('manual-item').value;
             const dateStr = document.getElementById('manual-date').value;
             const startStr = document.getElementById('manual-start').value;
-            const endStr = document.getElementById('manual-end').value;
+            const endStr = endInput.value;
 
             const startD = new Date(`${dateStr}T${startStr}`);
             const endD = new Date(`${dateStr}T${endStr}`);
 
             if (endD <= startD) {
-                App.showAlert('エラー', '終了時刻は開始時刻より後に設定してください。');
+                endInput.setCustomValidity('終了時刻は開始時刻より後に設定してください。');
+                endInput.reportValidity();
                 return;
             }
 
@@ -538,11 +549,20 @@ const App = {
 
             const a = document.createElement('a');
             a.href = url;
-            a.download = `work_time_backup_${this.getTodayDateString()}.json`;
+            const userName = StorageAPI.getUserName();
+            const namePart = userName ? `${userName}-` : '';
+            a.download = `work-time-tracker-${namePart}backup.json`;
+
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+
+            // Record last backup date
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            StorageAPI.setLastBackupDate(dateStr);
+            this.updateLastBackupDisplay();
         });
 
         document.getElementById('btn-import-trigger').addEventListener('click', () => {
@@ -555,7 +575,7 @@ const App = {
 
             const reader = new FileReader();
             reader.onload = (event) => {
-                this.showConfirm('確認', '現在のデータを上書きしてインポートします。よろしいですか？', () => {
+                this.showConfirm('確認', 'このバックアップを復元すると、現在のデータを上書きします。よろしいですか？', () => {
                     const success = StorageAPI.importData(event.target.result);
                     if (success) {
                         App.showAlert('通知', 'インポートが完了しました。ページをリロードします。', () => location.reload());
@@ -922,5 +942,16 @@ const App = {
         overlay.appendChild(modalBox);
 
         document.body.appendChild(overlay);
+    },
+
+    updateLastBackupDisplay: function () {
+        const lastBackupLabel = document.getElementById('label-last-backup');
+        if (!lastBackupLabel) return;
+        const lastDate = StorageAPI.getLastBackupDate();
+        if (lastDate) {
+            lastBackupLabel.textContent = `最後のバックアップ：${lastDate}`;
+        } else {
+            lastBackupLabel.textContent = 'まだバックアップされていません';
+        }
     }
 };

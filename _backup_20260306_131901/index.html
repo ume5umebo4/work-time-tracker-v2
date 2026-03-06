@@ -225,20 +225,14 @@
                 </div>
                 <div class="card">
                     <h3>データのエクスポート・インポート</h3>
-                    <p class="text-muted">MacとiPhoneでデータを引き継ぎたい場合は、iCloud
-                        DriveにバックアップしたJSONを、別端末で復元してください。<br>※完全自動同期ではなく、手動のバックアップ/復元です。</p>
-                    <div class="settings-actions" style="margin-top: 16px;">
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <button class="btn btn-primary" id="btn-export-json"><i class="fa-solid fa-cloud"></i>
-                                iCloudバックアップ</button>
-                            <span id="label-last-backup" class="text-muted"
-                                style="font-size: 0.85rem; margin-left: 4px;"></span>
-                        </div>
+                    <p class="text-muted">ブラウザに保存されているデータをファイルとして保存したり、読み込んだりできます。</p>
+                    <div class="settings-actions">
+                        <button class="btn btn-primary" id="btn-export-json"><i class="fa-solid fa-download"></i>
+                            JSONでエクスポート</button>
                         <div class="import-wrapper">
                             <input type="file" id="file-import-json" accept=".json" style="display: none;">
-                            <button class="btn btn-outline" id="btn-import-trigger"><i
-                                    class="fa-solid fa-cloud-arrow-down"></i>
-                                iCloudから復元</button>
+                            <button class="btn btn-outline" id="btn-import-trigger"><i class="fa-solid fa-upload"></i>
+                                JSONをインポート</button>
                         </div>
                     </div>
                 </div>
@@ -352,10 +346,8 @@
                         <p><strong>5. 今日の積み上げを作る</strong><br>
                             期間内の履歴からSNS投稿用の文章を作れます。最も時間をかけた（最多アイテム）に応じた画像生成プロンプト（少しランダム要素入り）も一緒に作られるので、日々の振り返り投稿に活用してください。
                         </p>
-                        <p><strong>6. データバックアップと引き継ぎ</strong><br>
-                            「設定」から「iCloudバックアップ」を行い、保存したJSONファイルをiCloud
-                            Drive経由で別端末に渡して「iCloudから復元」することで、MacとiPhone間でデータを引き継ぐことができます（手動移行）。また、ここで登録者名を設定するとコピー時等に名前が入ります。
-                        </p>
+                        <p><strong>6. 設定（登録者名とデータバックアップ）</strong><br>
+                            「設定」からあなたの名前（登録者名）を設定すると、コピー時等に名前を入れることができます。またJSON形式でのデータバックアップもここで行えます。</p>
                     </div>
                 </div>
             </section>
@@ -426,7 +418,7 @@
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-outline close-modal">キャンセル</button>
-                        <button type="button" class="btn btn-primary" id="btn-save-manual-record">保存</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
                     </div>
                 </form>
             </div>
@@ -491,8 +483,8 @@
                         <li><i class="fa-solid fa-wand-magic-sparkles" style="color:#9b59b6; width:20px;"></i>
                             <strong>積み上げを作る</strong>：履歴からSNS投稿用の文と画像生成プロンプトを作れます
                         </li>
-                        <li><i class="fa-solid fa-cloud" style="color:var(--text-muted); width:20px;"></i>
-                            <strong>連携とバックアップ</strong>：「設定」からiCloud Drive経由でのバックアップ・別端末（Mac/iPhone）への復元が可能です
+                        <li><i class="fa-solid fa-gear" style="color:var(--text-muted); width:20px;"></i>
+                            <strong>設定</strong>：登録者名を設定したり、JSONバックアップが可能です
                         </li>
                     </ul>
                 </div>
@@ -512,10 +504,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/storage.js?v=9"></script>
-    <script src="js/timer.js?v=9"></script>
-    <script src="js/charts.js?v=9"></script>
-    <script src="js/app.js?v=9"></script>
+    <script src="js/storage.js?v=99"></script>
+    <script src="js/timer.js?v=99"></script>
+    <script src="js/charts.js?v=99"></script>
+    <script src="js/app.js?v=99"></script>
 </body>
 
 </html>

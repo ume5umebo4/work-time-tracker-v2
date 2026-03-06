@@ -3,8 +3,7 @@ const STORAGE_KEYS = {
     SESSIONS: 'work_time_sessions',
     ACTIVE: 'work_time_active_session',
     USER_NAME: 'work_time_user_name',
-    TUTORIAL_SHOWN: 'work_time_tutorial_shown',
-    LAST_BACKUP: 'work_time_last_backup'
+    TUTORIAL_SHOWN: 'work_time_tutorial_shown'
 };
 
 const StorageAPI = {
@@ -110,13 +109,6 @@ const StorageAPI = {
         }
     },
 
-    getLastBackupDate: function () {
-        return localStorage.getItem(STORAGE_KEYS.LAST_BACKUP) || null;
-    },
-    setLastBackupDate: function (dateStr) {
-        localStorage.setItem(STORAGE_KEYS.LAST_BACKUP, dateStr);
-    },
-
     // ---- Data Management ----
     exportData: function () {
         const data = {
@@ -156,6 +148,5 @@ const StorageAPI = {
         localStorage.removeItem(STORAGE_KEYS.ACTIVE);
         localStorage.removeItem(STORAGE_KEYS.USER_NAME);
         localStorage.removeItem(STORAGE_KEYS.TUTORIAL_SHOWN);
-        localStorage.removeItem(STORAGE_KEYS.LAST_BACKUP);
     }
 };
